@@ -141,3 +141,55 @@ Fuentes de proveedores y agregadores (sesgo comercial):
 - AIApplyd, herramientas de búsqueda de empleo según Reddit: https://aiapplyd.com/blog/job-search-tools-reddit-recommends-2026
 - Parseur, comparación n8n, Zapier, Make: https://parseur.com/blog/zapier-n8n-make
 - Tryorbye, reseña de Zapier con quejas de G2 y Trustpilot: https://www.tryorbye.com/products/zapier
+
+## 8. Segundo filtro: escalable y fácil de vender (añadido tras revisión)
+
+Las dos condiciones tiran en direcciones opuestas. Lo más fácil de vender en persona (restaurante, plata perdida en la mano) es lo menos escalable; lo más escalable (software autoservicio) es lo más difícil de vender sin canal. Para un desarrollador solo, "fácil de vender" tiene que significar:
+
+1. El cliente ve el valor en dinero antes de pagar (el primer reporte lo convence, no un vendedor).
+2. Alta autoservicio: conectar cuenta o subir archivo, menos de 15 minutos, sin integración a medida.
+3. Un solo formato de datos para todos los clientes (una API o un exporte estándar), no un parser por cliente.
+4. Los clientes ya están reunidos en algún lugar (grupos, foros, comunidades) donde un caso de éxito se propaga solo.
+
+Puntuación de 1 a 5 de los candidatos contra esas cuatro condiciones:
+
+| Candidato | Valor visible antes de pagar | Autoservicio | Un solo formato | Clientes reunidos | Total |
+|---|---|---|---|---|---|
+| Auditoría de liquidaciones para vendedores de Mercado Libre | 5 | 5 (API oficial) | 5 (una plataforma, 18 países) | 5 (grupos enormes de vendedores) | 20 |
+| Recuperación de pagos fallidos (dunning) para suscripciones LATAM | 5 | 3 (depende del procesador) | 2 (Mercado Pago, dLocal, Rebill, bancos) | 3 | 13 |
+| Portal contador-cliente | 2 | 4 | 4 | 4 (colegios, grupos de contadores) | 14 |
+| Recordatorios de cobro por WhatsApp | 3 | 4 | 4 | 2 (freelancers dispersos) | 13 |
+| Conciliación de delivery para restaurantes | 5 | 2 (exportes manuales, dueños poco técnicos) | 2 (un parser por plataforma y país) | 3 | 12 |
+
+### 8.1 Recomendación ajustada: auditoría de liquidaciones de Mercado Libre
+
+**Qué es.** El vendedor conecta su cuenta (API oficial de Mercado Libre). La herramienta cruza cada venta con la tabla de comisiones vigente, los cargos de envío, los reembolsos, las bonificaciones y las retenciones impositivas, y le muestra: cuánto le descontaron en total, qué cargos no cuadran con las reglas publicadas, y el texto del reclamo listo para enviar.
+
+**Evidencia de dolor.**
+- La provincia de Buenos Aires registró 2 396 denuncias contra Mercado Libre solo en los primeros cuatro meses de 2026, la empresa con más reclamos de la provincia (Conclusión, La Política Online).
+- Caso citado en prensa: venta de 110 000 pesos de la que el vendedor recibió 64 577, un 42 % en comisiones y cargos (Diario Jornada).
+- Quejas recurrentes en sitios de reclamos sobre "exceso de bonificaciones", "cargo no reconocido" y "retenciones de impuestos indebidas"; vendedores que dicen no entender la diferencia entre comisiones concretadas, bonificadas y CEB (TuQuejaSuma).
+- Petición en Change.org pidiendo intervención de Profeco por abusos hacia vendedores en México.
+- No se encontró ninguna herramienta dedicada a auditar liquidaciones. Lo que existe son calculadoras de rentabilidad (Algoritmo Digital) y analítica de ventas (Nubimetrics, Real Trends), que demuestran que los vendedores ya pagan por software.
+
+**Por qué cumple "escalable".** Una sola API, un solo modelo de datos, 18 países con el mismo producto, cero integración a medida, soporte casi nulo una vez conectada la cuenta. El costo marginal por cliente es prácticamente cero.
+
+**Por qué cumple "fácil de vender".** El primer reporte es la venta: "conectá tu cuenta gratis y te decimos cuánto te cobraron de más". Los vendedores están concentrados en grupos de Facebook, Telegram y foros con decenas de miles de miembros, donde un solo caso de "recuperé X pesos" se replica solo. Modelo de precio natural: gratis el diagnóstico, suscripción mensual o comisión sobre lo recuperado.
+
+**Riesgo honesto, y es grande.** Puede que Mercado Libre cobre caro pero cobre bien. Si las quejas son "la comisión es alta" y no "la comisión está mal calculada", la herramienta no encuentra nada y el producto se reduce a "explicador de liquidaciones", que vale mucho menos. Esto se resuelve en una semana: pedir a 5 vendedores su exporte de ventas y cobros de un mes y cruzarlo a mano contra las tablas vigentes. Si no aparecen errores en al menos 2 de 5, se descarta.
+
+Otros riesgos: dependencia total de una plataforma que puede cambiar la API o sus términos; Mercado Libre puede ver la herramienta como hostil; las tablas de comisiones cambian con frecuencia (la de Argentina cambió el 1 de septiembre de 2026) y hay que mantenerlas por país.
+
+**MVP (2 a 3 semanas).**
+1. Login con cuenta de Mercado Libre vía OAuth y lectura de órdenes, pagos, envíos y facturas de cargos.
+2. Tabla de comisiones y costos de envío de un solo país, versionada por fecha de vigencia.
+3. Motor que recalcula lo que debería haberse cobrado por cada venta y lo compara con lo cobrado.
+4. Reporte: total descontado por categoría, lista de diferencias ordenadas por monto, texto de reclamo.
+5. Empezar con Argentina o México según dónde consigas los 5 vendedores piloto.
+
+### 8.2 Por qué las otras quedan detrás
+
+- **Conciliación de delivery:** sigue siendo la más fácil de vender uno a uno, pero no escala sin fuerza de ventas: dueños poco técnicos, exportes manuales, un parser por plataforma y país. Buen negocio de servicios, mal producto escalable.
+- **Dunning LATAM:** la recuperación de pagos fallidos tiene ROI inmediato, pero exige integrarse con cada procesador (Mercado Pago, dLocal, bancos) y ya hay jugadores regionales (Rebill, DRUO con Smart Retries en Colombia). Recurly estima 129 000 millones de dólares perdidos globalmente en 2025 por fallos de pago, así que el mercado existe, pero no es terreno para empezar solo.
+- **Portal contador-cliente:** escala por canal (un contador trae 30 clientes), pero el valor no se ve antes de pagar y los contadores compran lento.
+- **Recordatorios de cobro:** mercado saturado y clientes dispersos; cuesta más conseguir cada cliente de lo que paga.
